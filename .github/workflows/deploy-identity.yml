@@ -1,0 +1,39 @@
+name: Deploy Identity (CA + PIM)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'identity/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  identity:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Install Graph modules
+        shell: pwsh
+        run: |
+          Install-Module Microsoft.Graph -Force -Scope CurrentUser
+          Install-Module Microsoft.Graph.Beta -Force -Scope CurrentUser
+      - name: Create CA policies (edit placeholders before enabling)
+        shell: pwsh
+        run: |
+          ./identity/conditional-access/01-block-legacy-auth.ps1 -TenantId "${{ secrets.AZURE_TENANT_ID }}"
+          ./identity/conditional-access/02-mfa-all-users.ps1 -TenantId "${{ secrets.AZURE_TENANT_ID }}" -ExcludeUsers @("breakglass1@contoso.com","breakglass2@contoso.com")
+          ./identity/conditional-access/03-critical-apps-strong-auth-compliant-device.ps1 -TenantId "${{ secrets.AZURE_TENANT_ID }}" -CriticalAppIds @("00000003-0000-0ff1-ce00-000000000000")
+          ./identity/conditional-access/04-high-risk-signin-block-or-reset.ps1 -TenantId "${{ secrets.AZURE_TENANT_ID }}" -Block
+      - name: PIM eligibility example
+        shell: pwsh
+        run: |
+          ./identity/pim/create-eligible-assignments.ps1             -TenantId "${{ secrets.AZURE_TENANT_ID }}"             -UserId  "${{ vars.PIM_USER_OBJECT_ID }}"             -RoleDefinitionId "62e90394-69f5-4237-9190-012177145e10"

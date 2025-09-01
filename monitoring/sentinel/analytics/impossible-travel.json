@@ -1,0 +1,20 @@
+{
+  "properties": {
+    "displayName": "ZT - Impossible travel (country mismatch within 30m)",
+    "description": "Detects two successful sign-ins by the same user within 30 minutes from different countries.",
+    "severity": "Medium",
+    "enabled": true,
+    "queryFrequency": "PT1H",
+    "queryPeriod": "PT1H",
+    "triggerOperator": "GreaterThan",
+    "triggerThreshold": 0,
+    "query": "\nlet window = 30m;\nlet s = SigninLogs\n  | where ResultType == 0\n  | project TimeGenerated, UserPrincipalName, IPAddress, Country=tostring(LocationDetails.countryOrRegion);\ns\n| join kind=inner s on UserPrincipalName\n| where abs(datetime_diff('minute', TimeGenerated, TimeGenerated1)) < 30\n| where Country != Country1\n| project UserPrincipalName, TimeGenerated, Country, IPAddress, TimeGenerated1, Country1, IPAddress1\n",
+    "tactics": [
+      "InitialAccess",
+      "CredentialAccess"
+    ],
+    "kind": "Scheduled",
+    "suppressionDuration": "PT1H",
+    "suppressionEnabled": false
+  }
+}

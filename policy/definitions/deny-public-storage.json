@@ -1,0 +1,29 @@
+{
+  "properties": {
+    "displayName": "Deny public network access for Storage Accounts",
+    "policyType": "Custom",
+    "mode": "All",
+    "description": "Ensures Storage Accounts are not publicly accessible.",
+    "metadata": {
+      "category": "Network"
+    },
+    "parameters": {},
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "type",
+            "equals": "Microsoft.Storage/storageAccounts"
+          },
+          {
+            "field": "Microsoft.Storage/storageAccounts/publicNetworkAccess",
+            "notEquals": "Disabled"
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+  }
+}

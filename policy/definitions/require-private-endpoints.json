@@ -1,0 +1,33 @@
+{
+  "properties": {
+    "displayName": "Require Private Endpoints for Storage",
+    "policyType": "Custom",
+    "mode": "Indexed",
+    "description": "Audit or deny Storage Accounts without Private Endpoints.",
+    "metadata": {
+      "category": "Network"
+    },
+    "parameters": {
+      "effect": {
+        "type": "String",
+        "metadata": {
+          "displayName": "Effect"
+        },
+        "allowedValues": [
+          "Audit",
+          "Deny"
+        ],
+        "defaultValue": "Audit"
+      }
+    },
+    "policyRule": {
+      "if": {
+        "field": "type",
+        "equals": "Microsoft.Storage/storageAccounts"
+      },
+      "then": {
+        "effect": "${{parameters('effect')}}"
+      }
+    }
+  }
+}

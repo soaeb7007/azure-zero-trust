@@ -1,0 +1,4 @@
+{
+  "@odata.type": "#microsoft.graph.iosManagedAppProtection",
+  "description": "Placeholder - configure per org"
+}

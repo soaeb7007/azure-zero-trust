@@ -1,0 +1,4 @@
+{
+  "@odata.type": "#microsoft.graph.windows10CompliancePolicy",
+  "description": "Placeholder - configure per org"
+}
